@@ -233,7 +233,7 @@
       }
 
       try {
-        const response = await fetch('/.netlify/functions/submit-review', {
+        const response = await fetch('https://my-first-repository-project.netlify.app/.netlify/functions/submit-review', {
           method: 'POST',
           body: JSON.stringify({ name, rating, comment, date }),
           headers: {

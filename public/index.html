@@ -1,30 +1,290 @@
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Jamstack Explorers - Up and Running with Serverless Functions</title>
-    </head>
-    <body>
-      <h1>Up and Running with Serverless Functions</h1>
-      <button id="fetch-btn">Fetch</button>
-      <p id="response-output">Response Placeholder</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Avaliações</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      margin: 0;
+      background-color: #f8f8f8;
+      overflow-y: auto;
+    }
 
-      <script>
-        document.addEventListener('DOMContentLoaded', () => {
-          const fetchBtn = document.getElementById('fetch-btn')
-          const responseText = document.getElementById('response-output')
-      
-          fetchBtn.addEventListener('click', async () => {
-            const response = await fetch('/.netlify/functions/hello-world').then(response => response.json())   
-            
-            responseText.innerText = JSON.stringify
-            (response)
-          })
-        })
-      </script>
-      
+    .container {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 25px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
-    </body>
-  </html>
+    h1 {
+      font-size: 18px;
+      font-weight: bold;
+      color: #000000;
+    }
+
+    .stars {
+      font-size: 25px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .stars .star {
+      color: gray;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .stars .star.checked {
+      color: #fcbf06;
+    }
+
+    #review-form {
+      text-align: center;
+      border-radius: 25px;
+      margin-bottom: 20px;
+    }
+
+    #review-form label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    #review-form input[type="text"],
+    #review-form textarea,
+    #review-form button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 25px;
+      box-sizing: border-box;
+      font-size: 16px;
+      outline: none;
+      color: #000000;
+      background-color: #ffffff;
+    }
+
+    #review-form textarea {
+      resize: vertical;
+    }
+
+    #review-form input[type="text"]::placeholder,
+    #review-form textarea::placeholder {
+      color: #999;
+    }
+
+    #review-form button {
+      cursor: pointer;
+      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+      font-weight: bold;
+      padding: 12px 20px;
+      background-color: #ffffff;
+      border: 2px solid #1a6aff;
+      color: #1a6aff;
+      width: auto; /* Diminui a largura do botão */
+    }
+
+    #review-form button:hover {
+      background-color: #725bc2;
+      border-color: #725bc2;
+      color: #ffffff;
+    }
+
+    #review-form button:active {
+      background-color: #1a6aff;
+      border-color: #1a6aff;
+      color: #ffffff;
+    }
+
+    .review-container {
+      width: 90%;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 25px;
+      margin-top: 20px;
+      text-align: left;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .review {
+      background-color: #f3f3f3;
+      padding: 20px;
+      border-radius: 25px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      width: 100%;
+    }
+
+    .review .stars {
+      font-size: 25px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .review .stars .star {
+      color: #fcbf06;
+    }
+
+    .review p {
+      margin: 10px 0;
+      text-align: justify;
+    }
+
+    .review .name-date {
+      font-size: 20px;
+      color: #333; /* Define a cor cinza mais escuro */
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .review .date {
+      font-size: 15px; /* Tamanho da fonte da data */
+      color: #333; /* Define a cor cinza mais escuro */
+    }
+
+    .review .comment {
+      font-size: 20px; /* Aumenta o tamanho da fonte para 20px */
+    }
+
+    .verified-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: #e6e6fa; /* Cor roxa clara */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 5px;
+    }
+
+    .verified-icon::after {
+      content: '✔'; /* Usamos um ✔ como o ícone de verificação */
+      font-size: 8px; /* Tamanho do ícone */
+      color: #725bc2; /* Cor do símbolo de verificação */
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Avaliações</h1>
+
+    <form id="review-form" onsubmit="submitReview(event)">
+      <div class="stars">
+        <span class="star" onclick="setRating(1)">★</span>
+        <span class="star" onclick="setRating(2)">★</span>
+        <span class="star" onclick="setRating(3)">★</span>
+        <span class="star" onclick="setRating(4)">★</span>
+        <span class="star" onclick="setRating(5)">★</span>
+      </div>
+      <input type="text" id="name" name="name" placeholder="Nome" required><br><br>
+      <input type="hidden" id="rating" name="rating" value="0">
+      <textarea id="comment" name="comment" rows="4" placeholder="Insira seu comentário aqui..." required></textarea><br><br>
+      <button type="submit">Avaliar</button>
+    </form>
+
+    <div id="response-output" class="review-container"></div>
+  </div>
+
+  <script>
+    function setRating(stars) {
+      const starElements = document.querySelectorAll('.stars .star');
+      starElements.forEach((star, index) => {
+        if (index < stars) {
+          star.classList.add('checked');
+        } else {
+          star.classList.remove('checked');
+        }
+      });
+
+      document.getElementById('rating').value = stars;
+    }
+
+    async function submitReview(event) {
+      event.preventDefault();
+
+      const formData = new FormData(event.target);
+      const name = formData.get('name');
+      const rating = parseInt(formData.get('rating'));
+      const comment = formData.get('comment');
+      const date = new Date().toISOString();
+
+      if (rating === 0) {
+        alert('Por favor, selecione a quantidade de estrelas.');
+        return;
+      }
+
+      try {
+        const response = await fetch('/.netlify/functions/submit-review', {
+          method: 'POST',
+          body: JSON.stringify({ name, rating, comment, date }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          const responseOutput = document.getElementById('response-output');
+
+          const newReview = document.createElement('div');
+          newReview.classList.add('review');
+          newReview.innerHTML = `
+            <div class="stars">
+              ${'★'.repeat(result.rating).split('').map(star => `<span class="star">${star}</span>`).join('')}
+              ${'★'.repeat(5 - result.rating).split('').map(star => `<span class="star" style="color: gray;">${star}</span>`).join('')}
+            </div>
+            <p class="name-date">${obfuscateName(result.name)} | ${formatDate(result.date)} <span class="verified-icon"></span></p>
+            <p class="comment">${result.comment}</p>
+          `;
+          responseOutput.prepend(newReview);
+
+          document.getElementById('review-form').reset();
+          document.getElementById('rating').value = 0;
+          const starElements = document.querySelectorAll('.stars .star');
+          starElements.forEach(star => star.classList.remove('checked'));
+        } else {
+          throw new Error('Ocorreu um erro ao enviar a avaliação.');
+        }
+      } catch (error) {
+        console.error('Erro no processamento da resposta:', error);
+        const responseOutput = document.getElementById('response-output');
+        responseOutput.innerHTML = `<p>Ocorreu um erro ao enviar a avaliação. Por favor, tente novamente mais tarde.</p>`;
+      }
+    }
+
+    // Função para ofuscar o nome
+    function obfuscateName(name) {
+      if (name.length <= 1) return '*';
+      return name[0] + '*'.repeat(name.length - 2) + name[name.length - 1];
+    }
+
+    // Função para formatar a data
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return date.toLocaleDateString('pt-BR', options);
+    }
+
+  </script>
+</body>
+</html>

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Avaliações</title>
   <style>
     body {
@@ -205,6 +205,37 @@
   </div>
 
   <script>
+    async function fetchReviews() {
+      try {
+        const response = await fetch('/.netlify/functions/fetch-reviews');
+        if (!response.ok) {
+          throw new Error('Erro ao buscar avaliações.');
+        }
+        const reviews = await response.json();
+        displayReviews(reviews);
+      } catch (error) {
+        console.error('Erro:', error.message);
+      }
+    }
+
+    function displayReviews(reviews) {
+      const reviewsContainer = document.getElementById('response-output');
+      reviewsContainer.innerHTML = '';
+
+      reviews.forEach(review => {
+        const reviewElement = document.createElement('div');
+        reviewElement.classList.add('review');
+        reviewElement.innerHTML = `
+          <div class="stars">
+            ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+          </div>
+          <p class="name-date">${obfuscateName(review.name)} | ${formatDate(review.date)}</p>
+          <p class="comment">${review.comment}</p>
+        `;
+        reviewsContainer.appendChild(reviewElement);
+      });
+    }
+
     function setRating(stars) {
       const starElements = document.querySelectorAll('.stars .star');
       starElements.forEach((star, index) => {
@@ -244,22 +275,20 @@
         const result = await response.json();
 
         if (response.ok) {
-          const responseOutput = document.getElementById('response-output');
+          const reviewsContainer = document.getElementById('response-output');
 
           const newReview = document.createElement('div');
           newReview.classList.add('review');
           newReview.innerHTML = `
             <div class="stars">
-              ${'★'.repeat(result.rating).split('').map(star => `<span class="star">${star}</span>`).join('')}
-              ${'★'.repeat(5 - result.rating).split('').map(star => `<span class="star" style="color: gray;">${star}</span>`).join('')}
+              ${'★'.repeat(result.rating)}${'☆'.repeat(5 - result.rating)}
             </div>
-            <p class="name-date">${obfuscateName(result.name)} | ${formatDate(result.date)} <span class="verified-icon"></span></p>
+            <p class="name-date">${obfuscateName(result.name)} | ${formatDate(result.date)}</p>
             <p class="comment">${result.comment}</p>
           `;
-          responseOutput.prepend(newReview);
+          reviewsContainer.prepend(newReview);
 
           document.getElementById('review-form').reset();
-          document.getElementById('rating').value = 0;
           const starElements = document.querySelectorAll('.stars .star');
           starElements.forEach(star => star.classList.remove('checked'));
         } else {
@@ -267,8 +296,8 @@
         }
       } catch (error) {
         console.error('Erro no processamento da resposta:', error);
-        const responseOutput = document.getElementById('response-output');
-        responseOutput.innerHTML = `<p>Ocorreu um erro ao enviar a avaliação. Por favor, tente novamente mais tarde.</p>`;
+        const reviewsContainer = document.getElementById('response-output');
+        reviewsContainer.innerHTML = `<p>Ocorreu um erro ao enviar a avaliação. Por favor, tente novamente mais tarde.</p>`;
       }
     }
 
@@ -285,6 +314,10 @@
       return date.toLocaleDateString('pt-BR', options);
     }
 
+    // Carregar as avaliações ao carregar a página
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchReviews();
+    });
   </script>
 </body>
 </html>
